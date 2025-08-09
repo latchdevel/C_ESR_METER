@@ -69,9 +69,9 @@ $R_g=\frac{49.4kΩ}{G-1}$
 
 Therefore:
  - For $G$ = 33, $R_g$ = 1543.75Ω approx **1.5kΩ** --> Single resistor (R1)
- - For $G$ = 330, $R_g$ = 150.15Ω approx **150Ω** --> 167Ω parallel circuit 1500Ω --> 92Ω (CD4066B $R_{on}$ @5v)<sup>1</sup> + 75Ω (R2)
+ - For $G$ = 330, $R_g$ = 150.15Ω approx **150Ω** --> 167Ω parallel circuit 1500Ω --> 143Ω (CD4066B $R_{on}$ @5v)<sup>1</sup> + 24Ω (R2)
 
- <sup>1</sup> CD4066B Quad bilateral analog switch $R_{on}$ @5v must be measured.
+ <sup>1</sup> CD4066B Quad bilateral analog switch $R_{on}$ @5v must be measured between pins 8 and 9.
 
 VSS (-5V) negative voltage is still necessary, because it operates very close to zero voltage. Even modern Rail-to-Rail Op-Amps do not achieve an acceptable lineal result when operating so close to zero volts.
 But now, the VSS level is not critical, it does not require lineal regulator or manual offset adjustment, since the AD620 has a reference terminal to set the potential that defines the zero output voltage, which can be connected directly to GND.
@@ -113,7 +113,7 @@ Another improvement has been to change the connection interface of LCD display t
 
 # Schematic
 
-[<img src="Images/A3_107_schema_RC00.png" alt="Schematic" width="800"/>](Images/A3_107_schema_RC00.png)
+[<img src="Images/A3_108_schema_RC00.png" alt="Schematic" width="800"/>](Images/A3_108_schema_RC00.png)
 
 # PCB
 The proof-of-concept PCB is designed in just two layers with through-hole components so you can easily build it yourself, maintaining a small enough size for cheap manufacturing.
@@ -122,7 +122,7 @@ The proof-of-concept PCB is designed in just two layers with through-hole compon
 * Distance between corner mounting holes: 90mm x 70mm
 * Available LCD display (16x02) mounting holes: 75mm x 31mm
 
-<img src="Images/PCB_C_ESR_METER_107_3D.png" alt="3D PCB" width="800"/>
+<img src="Images/PCB_C_ESR_METER_108_3D.png" alt="3D PCB" width="800"/>
 
 Gerber files for PCB manufacture are available [here](Gerber).
 
@@ -178,8 +178,8 @@ Auto power off timer:         180 secs (approx)
 
 <img src="Images/Arduino_serial_plot.png" alt="Arduino serial plot" width="800"/>
 
-## Documentation
-- [X] [Schematic](Images/A3_107_schema_RC00.png)
+## Roadmap
+- [X] [Schematic](Images/A3_108_schema_RC00.png)
 - [X] [Gerber PCB files](Gerber)
 - [X] [BOM](BOM.md)
 - [X] [Arduino C++ source code](C_ESR_METER.ino)
