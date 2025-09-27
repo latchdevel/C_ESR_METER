@@ -1,0 +1,104 @@
+# GitHub Actions workflow to build the Arduino sketch for a compile-time test
+# Author: Jorge Rivera
+# Repository: https://github.com/latchdevel/C_ESR_METER
+# Created: September 2025
+
+# Name displayed for this workflow in GitHub UI
+name: Build Test
+
+# Define target board and platform for Arduino build
+env:
+  ARDUINO_BOARD: Arduino Nano
+  ARDUINO_PLATFORM: arduino:avr
+  ARDUINO_FQBN: arduino:avr:nano
+  ARDUINO_ADDITIONAL_URL:
+
+# Trigger the workflow when modifying the source or workflow files
+on:
+  push:
+    paths:
+      - '**/*.h'
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - '**/*.ino'
+      - '.github/workflows/*.yml'
+  pull_request:
+    paths:
+      - '**/*.h'
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - '**/*.ino'
+      - '.github/workflows/*.yml'
+
+# Scheduled run: this workflow will execute monthly on the 1st at 00:00 UTC
+  schedule:
+    - cron: '0 0 1 * *'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+  # Allows external systems to trigger this workflow via GitHub API
+  repository_dispatch:
+
+jobs:
+  build:
+    name: Compile Test
+    runs-on: ubuntu-latest
+
+    steps:
+      # Retrieve repository contents for workflow execution
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      # Extract repository name for artifact naming
+      - name: Get repository name
+        run: echo "REPO_NAME=$(basename ${{ github.repository }})" >> $GITHUB_ENV
+
+      # Extract short commit hash for artifact naming
+      - name: Get short commit hash
+        run: |
+          COMMIT_SHORT_SHA=$(git rev-parse --short HEAD)
+          echo "COMMIT_SHORT_SHA=$COMMIT_SHORT_SHA" >> $GITHUB_ENV
+          echo -e "\033[34;1mUsing commit hash: $COMMIT_SHORT_SHA\033[0m"
+
+      # Run Arduino Lint to validate sketch structure and compliance
+      - name: Arduino Lint
+        uses: arduino/arduino-lint-action@v2
+        with:
+          library-manager: false
+          project-type: sketch
+          recursive: true
+          compliance: strict
+
+      # Setup Arduino CLI environment for build process
+      - name: Setup Arduino CLI
+        uses: arduino/setup-arduino-cli@v2
+
+      # Install Arduino CLI platform core for selected board
+      - name: Install platform for ${{ env.ARDUINO_BOARD }} 
+        run: |
+          arduino-cli config init -v ${{ env.ARDUINO_ADDITIONAL_URL }}
+          arduino-cli core update-index -v 
+          arduino-cli core install -v ${{ env.ARDUINO_PLATFORM }} --run-post-install
+
+      # Install LiquidCrystal_I2C library from Arduino library manager
+      - name: Install LiquidCrystal_I2C library
+        run: |
+          arduino-cli lib update-index
+          arduino-cli lib install LiquidCrystal_I2C
+
+      # Compile the Arduino sketch with full verbosity and all warnings enabled
+      - name: Compile Sketch
+        run: |
+          arduino-cli compile --fqbn ${{ env.ARDUINO_FQBN }} -v --warnings all --export-binaries --no-color | tee build-${{ env.COMMIT_SHORT_SHA }}-log.txt
+          EXIT_CODE=${PIPESTATUS[0]}
+          exit $EXIT_CODE
+
+      # Upload compiled firmware and build log as single artifact
+      - name: Upload compiled firmware and build log
+        uses: actions/upload-artifact@v4
+        with:
+          name: "Firmware ${{ env.REPO_NAME }} commit #${{ env.COMMIT_SHORT_SHA }} for ${{ env.ARDUINO_BOARD }}"
+          path: |
+                build-${{ env.COMMIT_SHORT_SHA }}-log.txt
+                build/**
