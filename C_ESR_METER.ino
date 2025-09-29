@@ -30,6 +30,7 @@
 #include <LiquidCrystal_I2C.h>  // LiquidCrystal Arduino library for I2C PCF8574 based LCD displays (v1.1.2)
                                 // https://github.com/johnrickman/LiquidCrystal_I2C/tree/1.1.2
 
+#include <string.h>
 // Instance an I2C LCD display (16 columns x 2 rows) at PCF8574 address 0x27
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
@@ -176,7 +177,7 @@ byte lock[8] = {
 #define USR_Cx_EEPROM_OFFSET              0x10
 #define USR_1_Cx_EEPROM_OFFSET            0x14
 #define ESR_METER_FLAG_EEPROM_OFFSET      0x18
-#define ESR_METER_FLAG              "ESRMETER"
+constexpr const char ESR_METER_FLAG[] =   {'E','S','R','M','E','T','E','R'};
 
 // Timeouts values
 #define NO_TIMEOUT  0  // No timeout
@@ -864,18 +865,12 @@ void display_Cx_raw(LiquidCrystal_I2C lcd) {
 // Read user calibration values from EEPROM
 // or writes default calibration values in first use
 void initEEPROM(void) {
-
-  String flag = String(ESR_METER_FLAG);
-  String flag_read = String("");
-  char c = '\0';
-
+  char flag_read[sizeof(ESR_METER_FLAG)];
+  
   // Try to read ESR_METER_FLAG from EEPROM
-  for (uint16_t i = 0; i < flag.length(); i++) {
-    c = EEPROM.read(ESR_METER_FLAG_EEPROM_OFFSET + i);
-    flag_read += c;
-  }
+  EEPROM.get(ESR_METER_FLAG_EEPROM_OFFSET, flag_read);
 
-  if (flag == flag_read) {  // Read user settings from EEPROM
+  if (memcmp(ESR_METER_FLAG, flag_read, sizeof(flag_read)) == 0) {  // Read user settings from EEPROM
     EEPROM.get(U0_ESR_1_EEPROM_OFFSET, U0_ESR_1);
     EEPROM.get(U0_ESR_10_EEPROM_OFFSET, U0_ESR_10);
     EEPROM.get(USR_1_EEPROM_OFFSET, USR_1);
@@ -892,9 +887,7 @@ void initEEPROM(void) {
     EEPROM.put(USR_1_Cx_EEPROM_OFFSET, USR_1_Cx);
 
     // Write ESR_METER_FLAG to EEPROM
-    for (uint16_t i = 0; i < flag.length(); i++) {
-      EEPROM.write(ESR_METER_FLAG_EEPROM_OFFSET + i, flag[i]);
-    }
+    EEPROM.put(ESR_METER_FLAG_EEPROM_OFFSET, ESR_METER_FLAG);
   }
 }
 
