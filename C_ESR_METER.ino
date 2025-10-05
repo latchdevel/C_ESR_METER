@@ -30,7 +30,6 @@
 #include <LiquidCrystal_I2C.h>  // LiquidCrystal Arduino library for I2C PCF8574 based LCD displays (v1.1.2)
                                 // https://github.com/johnrickman/LiquidCrystal_I2C/tree/1.1.2
 
-#include <string.h>
 // Instance an I2C LCD display (16 columns x 2 rows) at PCF8574 address 0x27
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
