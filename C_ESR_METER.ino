@@ -1185,8 +1185,8 @@ void loop() {
         // Clear "button release" message
         lcd.clear();
 
-        // Force max unsigned long to enable manual power-off
-        AutoOffTimer = -1;
+        // Set max value to enable manual power-off
+        AutoOffTimer = UINT32_MAX;
 
       } else {  // Sort press to clear warning
 
@@ -1201,10 +1201,7 @@ void loop() {
       }
 
       // Check for "lock" status
-      #pragma GCC diagnostic push
-      #pragma GCC diagnostic ignored "-Wsign-compare"
-      if (AutoOffTimer == -1){
-      #pragma GCC diagnostic pop
+      if (AutoOffTimer == UINT32_MAX){
         // Re-display "lock char" to upper right corner
         lcd.setCursor(15, 0);        
         lcd.write(LOCK);
@@ -1250,8 +1247,8 @@ void loop() {
     // Set "Power On", keeping to HIGH the POWER_OFF output (USB DEBUG) forces battery power if present
     Set_Power_On;
 
-    // Force max unsigned long to enable manual power-off
-    AutoOffTimer = -1;
+    // Set max value to enable manual power-off
+    AutoOffTimer = UINT32_MAX;
 
     // Display "lock char" to upper right corner
     lcd.setCursor(15, 0);
