@@ -13,6 +13,10 @@ env:
   ARDUINO_FQBN: arduino:avr:nano
   ARDUINO_ADDITIONAL_URL:
 
+  # Temporary fix: Arduino actions are not yet updated to Node 24. 
+  # This allows the workflow to continue using Node 20 until fall 2026.
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
 # Trigger the workflow when modifying the source or workflow files
 on:
   push:
@@ -46,9 +50,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Compatibility Note
+        run: echo "::warning title=Node24 Migration - Arduino Fix::Using ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true as a temporary workaround because Arduino actions have not yet updated to Node 24."
+
       # Retrieve repository contents for workflow execution
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       # Extract repository name for artifact naming
       - name: Get repository name
@@ -96,7 +103,7 @@ jobs:
 
       # Upload compiled firmware and build log as single artifact
       - name: Upload compiled firmware and build log
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: "Firmware ${{ env.REPO_NAME }} commit #${{ env.COMMIT_SHORT_SHA }} for ${{ env.ARDUINO_BOARD }}"
           path: |
